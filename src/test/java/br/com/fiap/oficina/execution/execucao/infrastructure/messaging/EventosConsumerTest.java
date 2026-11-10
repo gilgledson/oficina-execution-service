@@ -81,6 +81,15 @@ class EventosConsumerTest {
     }
 
     @Test
+    @DisplayName("OS rejeitada direto no OS Service também tira a OS da fila")
+    void deveDespacharOrdemRejeitada() {
+        consumer.consumir(mensagem(EventosConsumer.ORDEM_REJEITADA, null));
+
+        verify(listener).onOrcamentoRejeitado(payload);
+        assertTrue(ack.get());
+    }
+
+    @Test
     @DisplayName("Evento desconhecido deve ser confirmado e ignorado")
     void deveIgnorarEventoDesconhecido() {
         consumer.consumir(mensagem("billing.orcamento-gerado", null));

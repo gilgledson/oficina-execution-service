@@ -34,7 +34,7 @@ mp:
           type: topic
         queue:
           name: execution.eventos
-        routing-keys: os.aberta,os.aprovada,os.cancelada,billing.orcamento-rejeitado,billing.orcamento-falhou
+        routing-keys: os.aberta,os.aprovada,os.cancelada,os.rejeitada,billing.orcamento-rejeitado,billing.orcamento-falhou
         # Mensagem que falha vai para a fila execution.eventos.dlq.
         failure-strategy: reject
         auto-bind-dlq: true

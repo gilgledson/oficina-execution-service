@@ -27,6 +27,7 @@ public class EventosConsumer {
     public static final String ORDEM_ABERTA = "os.aberta";
     public static final String ORDEM_APROVADA = "os.aprovada";
     public static final String ORDEM_CANCELADA = "os.cancelada";
+    public static final String ORDEM_REJEITADA = "os.rejeitada";
     public static final String ORCAMENTO_REJEITADO = "billing.orcamento-rejeitado";
     public static final String ORCAMENTO_FALHOU = "billing.orcamento-falhou";
 
@@ -64,7 +65,7 @@ public class EventosConsumer {
             case ORDEM_ABERTA -> listener.onOrdemAberta(payload);
             case ORDEM_APROVADA -> listener.onOrdemAprovada(payload);
             case ORDEM_CANCELADA -> listener.onOrdemCancelada(payload);
-            case ORCAMENTO_REJEITADO -> listener.onOrcamentoRejeitado(payload);
+            case ORDEM_REJEITADA, ORCAMENTO_REJEITADO -> listener.onOrcamentoRejeitado(payload);
             case ORCAMENTO_FALHOU -> listener.onOrcamentoFalhou(payload);
             default -> LOG.debugf("Evento %s ignorado pelo Execution Service", routingKey);
         }

@@ -89,7 +89,7 @@ Fila `execution.eventos`, ligada à exchange `oficina.events` (tipo `topic`).
 | `os.aberta` | `ordemServicoId` | Coloca a OS na fila de diagnóstico |
 | `os.aprovada` | `ordemServicoId`, `servicos[]` (`id`, `servicoId`, `nome`) | Coloca a OS na fila de execução com os serviços aceitos |
 | `os.cancelada` | `ordemServicoId`, `motivo` (opcional) | **Compensação:** tira a OS da fila |
-| `billing.orcamento-rejeitado` | `ordemServicoId` | **Compensação:** tira a OS da fila |
+| `os.rejeitada`, `billing.orcamento-rejeitado` | `ordemServicoId` | **Compensação:** tira a OS da fila |
 | `billing.orcamento-falhou` | `ordemServicoId` | **Compensação:** tira a OS da fila |
 
 ### Eventos publicados
@@ -154,7 +154,7 @@ docker compose up --build
 ```
 
 A API sobe em `http://localhost:8385`, o MongoDB na porta `27018` e o painel
-do RabbitMQ em `http://localhost:15672` (`guest`/`guest`).
+do RabbitMQ em `http://localhost:15672` (`oficina`/`oficina`).
 
 Testes e cobertura (falha abaixo de 80% de linhas; relatório em
 `target/site/jacoco/index.html`):
@@ -190,8 +190,6 @@ Configuração necessária no repositório:
 
 ## Pendências
 
-- O OS Service ainda precisa publicar `os.aberta`, `os.aprovada` e
-  `os.cancelada` e consumir os eventos `execucao.*`.
 - Provisionar o MongoDB em produção (ex.: Azure Cosmos DB for MongoDB) e o
   RabbitMQ no cluster.
 - Cenário **BDD** do fluxo completo da OS.
