@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: oficina-execution-config
+data:
+  QUARKUS_PROFILE: "prod"
+  MONGODB_DATABASE: "execution"
+  RABBITMQ_HOST: "rabbitmq.default.svc.cluster.local"
+  RABBITMQ_PORT: "5672"
+  NEW_RELIC_APP_NAME: "Oficina Execution Service (AKS)"

@@ -1,0 +1,58 @@
+quarkus:
+  application:
+    name: oficina-execution-service
+  swagger-ui:
+    always-include: true
+  http:
+    port: 8080
+  mongodb:
+    connection-string: ${MONGODB_URL:mongodb://localhost:27017}
+    database: ${MONGODB_DATABASE:execution}
+    # IDs são UUIDs; grava no formato padrão (subtipo 4) em vez do legado.
+    uuid-representation: standard
+  log:
+    console:
+      json: true
+  smallrye-jwt:
+    enabled: true
+
+# O Execution Service só valida o JWT (chave pública); quem emite é o OS Service.
+mp:
+  jwt:
+    verify:
+      issuer: "oficina-api-interna"
+      publickey:
+        location: "publicKey.pem"
+  messaging:
+    # Eventos do OS Service e do Billing que a execução consome. A fila é do
+    # Execution Service; a exchange (topic) é compartilhada pelos microsserviços.
+    incoming:
+      eventos-externos:
+        connector: smallrye-rabbitmq
+        exchange:
+          name: oficina.events
+          type: topic
+        queue:
+          name: execution.eventos
+        routing-keys: os.aberta,os.aprovada,os.cancelada,billing.orcamento-rejeitado,billing.orcamento-falhou
+        # Mensagem que falha vai para a fila execution.eventos.dlq.
+        failure-strategy: reject
+        auto-bind-dlq: true
+    # Eventos que o Execution Service publica (routing key definida por mensagem).
+    outgoing:
+      execution-events:
+        connector: smallrye-rabbitmq
+        exchange:
+          name: oficina.events
+          type: topic
+        publish-confirms: true
+
+rabbitmq-host: ${RABBITMQ_HOST:localhost}
+rabbitmq-port: ${RABBITMQ_PORT:5672}
+rabbitmq-username: ${RABBITMQ_USERNAME:guest}
+rabbitmq-password: ${RABBITMQ_PASSWORD:guest}
+
+oficina:
+  outbox:
+    # Intervalo de entrega dos eventos pendentes ao RabbitMQ.
+    intervalo: 2s

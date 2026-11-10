@@ -1,0 +1,70 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: oficina-execution
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: oficina-execution
+  template:
+    metadata:
+      labels:
+        app: oficina-execution
+    spec:
+      containers:
+      - name: oficina-execution
+        image: docker.io/gilgledson/oficina-execution-service:latest
+        imagePullPolicy: Always
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "256Mi"
+          limits:
+            cpu: "500m"
+            memory: "512Mi"
+        ports:
+        - containerPort: 8080
+        startupProbe:
+          httpGet:
+            path: /q/health/started
+            port: 8080
+          periodSeconds: 5
+          failureThreshold: 30
+        readinessProbe:
+          httpGet:
+            path: /q/health/ready
+            port: 8080
+          periodSeconds: 10
+          failureThreshold: 3
+        livenessProbe:
+          httpGet:
+            path: /q/health/live
+            port: 8080
+          periodSeconds: 15
+          failureThreshold: 3
+        envFrom:
+        - configMapRef:
+            name: oficina-execution-config
+        env:
+        # Connection string do MongoDB (inclui usuário e senha), por isso vem de Secret.
+        - name: MONGODB_URL
+          valueFrom:
+            secretKeyRef:
+              name: oficina-execution-secrets
+              key: mongodb-url
+        - name: RABBITMQ_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: oficina-execution-secrets
+              key: rabbitmq-username
+        - name: RABBITMQ_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: oficina-execution-secrets
+              key: rabbitmq-password
+        - name: NEW_RELIC_LICENSE_KEY
+          valueFrom:
+            secretKeyRef:
+              name: oficina-execution-secrets
+              key: new-relic-license-key
