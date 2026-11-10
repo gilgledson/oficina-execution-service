@@ -189,6 +189,10 @@ Configuração necessária no repositório:
   `RABBITMQ_PASSWORD`, `NEW_RELIC_LICENSE_KEY`.
 - Variables: `SONAR_ORGANIZATION`, `SONAR_PROJECT_KEY`.
 
+## Teste integrado
+
+Validado de ponta a ponta com MongoDB e RabbitMQ reais, junto com os outros dois serviços, pelo ambiente integrado do OS Service ([e2e](https://github.com/gilgledson/fiat-tech-challenge-ddd/tree/main/e2e)).
+
 ## Pendências
 
 - Provisionar o MongoDB em produção (ex.: Azure Cosmos DB for MongoDB) e o
@@ -196,7 +200,5 @@ Configuração necessária no repositório:
 - Cenário **BDD** do fluxo completo da OS.
 - Evidência de cobertura e link do SonarCloud, depois da primeira execução do
   pipeline.
-- O serviço ainda não foi executado contra MongoDB e RabbitMQ reais; a
-  validação até aqui é de compilação e testes unitários.
 - Dados existentes de funcionários e de tempos de execução do monólito não
   foram migrados.

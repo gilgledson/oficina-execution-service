@@ -81,14 +81,18 @@ public class OrdemExecucao {
     }
 
     /**
-     * Orçamento aprovado: a OS entra na fila de execução com os serviços
-     * aceitos pelo cliente.
+     * Serviços aprovados pelo cliente. Na primeira aprovação a OS entra na fila
+     * de execução; se ela já está na fila ou em execução (serviço extra
+     * aprovado depois), os serviços novos são acrescentados.
      *
-     * @return {@code false} se a aprovação já tinha sido registrada (evento repetido)
+     * @return {@code false} se nada mudou (evento repetido ou OS já encerrada)
      */
     public boolean enfileirarParaExecucao(List<ServicoExecucao> servicosAprovados, Instant agora) {
-        if (fase == FaseExecucao.FILA_EXECUCAO || fase == FaseExecucao.EM_EXECUCAO || fase == FaseExecucao.CONCLUIDA) {
+        if (fase.isEncerrada()) {
             return false;
+        }
+        if (fase == FaseExecucao.FILA_EXECUCAO || fase == FaseExecucao.EM_EXECUCAO) {
+            return acrescentarServicos(servicosAprovados);
         }
         exigirFase(FaseExecucao.AGUARDANDO_APROVACAO,
                 "Apenas ordens aguardando aprovação podem entrar na fila de execução.");
@@ -100,6 +104,18 @@ public class OrdemExecucao {
         this.entradaNaFila = agora;
         mudarFase(FaseExecucao.FILA_EXECUCAO, agora, null);
         return true;
+    }
+
+    private boolean acrescentarServicos(List<ServicoExecucao> servicosAprovados) {
+        if (servicosAprovados == null) {
+            return false;
+        }
+        List<ServicoExecucao> novos = servicosAprovados.stream()
+                .filter(novo -> servicos.stream()
+                        .noneMatch(existente -> existente.getServicoOsId().equals(novo.getServicoOsId())))
+                .toList();
+        this.servicos.addAll(novos);
+        return !novos.isEmpty();
     }
 
     public void iniciarExecucao(UUID usuarioId, Instant agora) {
@@ -188,7 +204,7 @@ public class OrdemExecucao {
         return servicos.stream()
                 .filter(s -> s.getServicoOsId().equals(servicoOsId))
                 .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("Serviço não encontrado nesta ordem."));
+                .orElseThrow(() -> new IllegalArgumentException("Serviço não está entre os aprovados desta ordem."));
     }
 
     private void exigirFase(FaseExecucao esperada, String mensagem) {

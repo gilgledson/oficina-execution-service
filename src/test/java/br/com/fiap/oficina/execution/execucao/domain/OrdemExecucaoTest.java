@@ -125,6 +125,35 @@ class OrdemExecucaoTest {
     }
 
     @Test
+    @DisplayName("Serviço extra aprovado durante a execução é acrescentado, sem mexer nos que já existem")
+    void deveAcrescentarServicoExtraDuranteExecucao() {
+        OrdemExecucao execucao = emExecucao();
+        execucao.iniciarServico(servicoA, mecanico, T0.plusSeconds(300));
+        UUID extra = UUID.randomUUID();
+        List<ServicoExecucao> aprovados = new java.util.ArrayList<>(doisServicos());
+        aprovados.add(new ServicoExecucao(extra, UUID.randomUUID(), "Balanceamento"));
+
+        boolean mudou = execucao.enfileirarParaExecucao(aprovados, T0.plusSeconds(400));
+
+        assertTrue(mudou);
+        assertEquals(FaseExecucao.EM_EXECUCAO, execucao.getFase());
+        assertEquals(3, execucao.getServicos().size());
+        assertEquals(StatusServico.EM_EXECUCAO, execucao.getServicos().get(0).getStatus());
+        assertEquals(extra, execucao.getServicos().get(2).getServicoOsId());
+        assertFalse(execucao.enfileirarParaExecucao(null, T0.plusSeconds(500)));
+    }
+
+    @Test
+    @DisplayName("Aprovação que chega depois de a OS ser encerrada é ignorada")
+    void deveIgnorarAprovacaoDeOsEncerrada() {
+        OrdemExecucao execucao = aguardandoAprovacao();
+        execucao.cancelar("OS cancelada", T0.plusSeconds(150));
+
+        assertFalse(execucao.enfileirarParaExecucao(doisServicos(), T0.plusSeconds(200)));
+        assertEquals(FaseExecucao.CANCELADA, execucao.getFase());
+    }
+
+    @Test
     @DisplayName("Não deve aprovar sem serviços nem antes do diagnóstico")
     void deveValidarAprovacao() {
         OrdemExecucao aguardando = aguardandoAprovacao();

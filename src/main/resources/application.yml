@@ -38,6 +38,10 @@ mp:
         # Mensagem que falha vai para a fila execution.eventos.dlq.
         failure-strategy: reject
         auto-bind-dlq: true
+        # Sem isto o conector não cria a exchange de mensagens mortas e o
+        # canal de entrada não sobe.
+        dlx:
+          declare: true
     # Eventos que o Execution Service publica (routing key definida por mensagem).
     outgoing:
       execution-events:
